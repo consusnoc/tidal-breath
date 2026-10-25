@@ -1,5 +1,5 @@
 // Keeps Tidal Breath working offline. Bump VERSION when any app file changes.
-const VERSION = 'tidal-breath-v1';
+const VERSION = 'tidal-breath-v2';
 const APP_FILES = [
   './',
   'index.html',
@@ -27,12 +27,17 @@ self.addEventListener('fetch', event => {
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
 
-  // App page: try the network first so updates arrive, fall back to the saved copy offline.
+  // App page: open the saved copy straight away, and refresh it in the background when online.
   if (req.mode === 'navigate') {
+    const fresh = fetch(req).then(res => {
+      if (res.ok) { const copy = res.clone(); caches.open(VERSION).then(c => c.put('index.html', copy)); }
+      return res;
+    });
+    event.waitUntil(fresh.catch(() => {}));
     event.respondWith(
-      fetch(req)
-        .then(res => { const copy = res.clone(); caches.open(VERSION).then(c => c.put('index.html', copy)); return res; })
-        .catch(() => caches.match('index.html'))
+      caches.match('index.html', { ignoreSearch: true })
+        .then(hit => hit || caches.match('./', { ignoreSearch: true }))
+        .then(hit => hit || fresh)
     );
     return;
   }
