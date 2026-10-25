@@ -1,0 +1,519 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Tidal Breath</title>
+<meta name="description" content="A personal guided-breathing app.">
+<meta name="theme-color" content="#0f1918">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Tidal Breath">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<style>
+html { box-sizing: border-box; padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+*, *::before, *::after { box-sizing: inherit; }
+body { margin: 0; overscroll-behavior: none; }
+</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&family=Figtree:wght@400;500;600&display=swap">
+<style>
+/* Layout: one calm screen. Orb owns the middle; settings fold away while you breathe. */
+:root {
+  --bg-top: #e6eeeb;
+  --bg-bottom: #d7e4df;
+  --ink: #1c2b29;
+  --ink-soft: #52635f;
+  --line: rgba(28, 43, 41, 0.14);
+  --surface: rgba(255, 255, 255, 0.55);
+  --surface-strong: rgba(255, 255, 255, 0.85);
+  --orb: #5f9187;
+  --orb-deep: #3f6d65;
+  --core: #f0c67f;
+  --accent: #2f6b62;
+  --accent-ink: #f4f8f6;
+  --font-display: "Cormorant Garamond", "Iowan Old Style", Georgia, serif;
+  --font-body: "Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg-top: #0f1918;
+    --bg-bottom: #0a1211;
+    --ink: #dce7e3;
+    --ink-soft: #8fa49f;
+    --line: rgba(220, 231, 227, 0.14);
+    --surface: rgba(255, 255, 255, 0.05);
+    --surface-strong: rgba(255, 255, 255, 0.1);
+    --orb: #6fa79b;
+    --orb-deep: #2c5850;
+    --core: #e6b86c;
+    --accent: #8cc4b7;
+    --accent-ink: #0d1716;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg-top: #0f1918;
+  --bg-bottom: #0a1211;
+  --ink: #dce7e3;
+  --ink-soft: #8fa49f;
+  --line: rgba(220, 231, 227, 0.14);
+  --surface: rgba(255, 255, 255, 0.05);
+  --surface-strong: rgba(255, 255, 255, 0.1);
+  --orb: #6fa79b;
+  --orb-deep: #2c5850;
+  --core: #e6b86c;
+  --accent: #8cc4b7;
+  --accent-ink: #0d1716;
+  color-scheme: dark;
+}
+
+[hidden] { display: none !important; }
+html, body { height: 100%; }
+body {
+  background: linear-gradient(180deg, var(--bg-top), var(--bg-bottom)) fixed, var(--bg-bottom);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 15px;
+  -webkit-tap-highlight-color: transparent;
+}
+button { font: inherit; color: inherit; }
+button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.app {
+  min-height: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 14px 20px;
+  box-sizing: border-box;
+}
+
+.top { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.brand { font-family: var(--font-display); font-size: 26px; font-weight: 500; letter-spacing: 0.01em; }
+.brand em { font-style: italic; color: var(--accent); }
+.stats { font-size: 12.5px; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+
+/* Stage */
+.stage { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; min-height: 0; padding-block: 8px; }
+.orb-wrap {
+  position: relative;
+  width: min(80vw, 44vh, 340px);
+  max-width: 100%;
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+}
+.app.running .orb-wrap { width: min(86vw, 60vh, 400px); }
+.ring { position: absolute; inset: 0; width: 100%; height: 100%; transform: rotate(-90deg); }
+.ring circle { fill: none; }
+.ring .track { stroke: var(--line); stroke-width: 1; }
+.ring .prog { stroke: var(--accent); stroke-width: 2; stroke-linecap: round; transition: opacity .4s; }
+.orb, .halo {
+  position: absolute;
+  width: 88%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  will-change: transform, opacity;
+}
+.orb {
+  background: radial-gradient(circle at 38% 32%, var(--core) 0%, color-mix(in srgb, var(--core) 35%, var(--orb)) 22%, var(--orb) 58%, var(--orb-deep) 100%);
+  box-shadow: inset 0 -12px 40px color-mix(in srgb, var(--orb-deep) 60%, transparent);
+}
+.halo { background: var(--orb); filter: blur(28px); opacity: 0.35; }
+.readout { position: relative; text-align: center; pointer-events: none; display: grid; gap: 2px; text-shadow: 0 1px 12px color-mix(in srgb, var(--orb-deep) 50%, transparent); }
+.phase { font-family: var(--font-display); font-style: italic; font-size: clamp(30px, 8vw, 42px); line-height: 1.05; color: #fbfaf5; }
+.count { font-size: 15px; font-weight: 500; color: rgba(251, 250, 245, 0.85); font-variant-numeric: tabular-nums; letter-spacing: 0.04em; min-height: 1.3em; }
+.meta { font-size: 13px; color: var(--ink-soft); text-align: center; font-variant-numeric: tabular-nums; min-height: 1.3em; }
+
+/* Controls */
+.controls { display: grid; gap: 16px; }
+.group { display: grid; gap: 8px; }
+.label { font-size: 11px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-soft); }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip {
+  border: 1px solid var(--line);
+  background: var(--surface);
+  border-radius: 999px;
+  padding: 8px 14px;
+  font-size: 14px;
+  cursor: pointer;
+  font-variant-numeric: tabular-nums;
+  transition: background .2s, border-color .2s;
+}
+.chip[aria-pressed="true"] { background: var(--ink); color: var(--bg-top); border-color: var(--ink); }
+.note { font-size: 13.5px; line-height: 1.45; color: var(--ink-soft); max-width: 60ch; margin: 0; }
+
+.custom { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+.step { display: grid; gap: 4px; justify-items: center; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 8px 4px; }
+.step span { font-size: 11px; color: var(--ink-soft); letter-spacing: 0.04em; }
+.step output { font-size: 18px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.step .pm { display: flex; gap: 4px; }
+.step button { width: 30px; height: 30px; border-radius: 50%; border: 1px solid var(--line); background: var(--surface-strong); cursor: pointer; font-size: 16px; line-height: 1; }
+
+.start {
+  border: 0;
+  border-radius: 999px;
+  padding: 16px 20px;
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+}
+
+.session-bar { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.remaining { font-size: 22px; font-weight: 500; font-variant-numeric: tabular-nums; }
+.remaining small { display: block; font-size: 11px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-soft); }
+.bar-buttons { display: flex; gap: 8px; }
+.ghost { border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 11px 18px; font-size: 14px; font-weight: 500; cursor: pointer; }
+
+@media (max-height: 640px) {
+  .controls { gap: 12px; }
+  .note { display: none; }
+}
+</style>
+</head>
+<body>
+
+<div class="app" id="app">
+  <header class="top">
+    <div class="brand">Tidal <em>Breath</em></div>
+    <div class="stats" id="stats"></div>
+  </header>
+
+  <main class="stage">
+    <div class="orb-wrap">
+      <svg class="ring" viewBox="0 0 200 200" aria-hidden="true">
+        <circle class="track" cx="100" cy="100" r="97"></circle>
+        <circle class="prog" id="prog" cx="100" cy="100" r="97"></circle>
+      </svg>
+      <div class="halo" id="halo"></div>
+      <div class="orb" id="orb"></div>
+      <div class="readout" aria-live="polite">
+        <div class="phase" id="phase">Ready</div>
+        <div class="count" id="count"></div>
+      </div>
+    </div>
+    <div class="meta" id="meta"></div>
+  </main>
+
+  <section class="controls" id="controls">
+    <div class="group">
+      <div class="label">Pattern</div>
+      <div class="chips" id="patterns"></div>
+      <p class="note" id="note"></p>
+      <div class="custom" id="custom" hidden></div>
+    </div>
+    <div class="group">
+      <div class="label">Length</div>
+      <div class="chips" id="lengths"></div>
+    </div>
+    <div class="group">
+      <div class="label">Sound</div>
+      <div class="chips" id="sounds"></div>
+    </div>
+    <button class="start" id="start">Begin</button>
+  </section>
+
+  <section class="session-bar" id="sessionBar" hidden>
+    <div class="remaining"><small>Left</small><span id="remaining">0:00</span></div>
+    <div class="bar-buttons">
+      <button class="ghost" id="pause">Pause</button>
+      <button class="ghost" id="end">End</button>
+    </div>
+  </section>
+</div>
+
+<script>
+(() => {
+  const PATTERNS = {
+    resonance: { name: 'Resonance', steps: [5.5, 0, 5.5, 0], note: 'Even in and out at about 5.5 breaths a minute, the pace most linked to higher heart-rate variability. A good everyday default.' },
+    unwind:    { name: 'Unwind',    steps: [4, 0, 6, 0],     note: 'A longer out-breath than in-breath. Helps the body shift down when you feel wound up.' },
+    box:       { name: 'Box',       steps: [4, 4, 4, 4],     note: 'Four equal sides: in, hold, out, hold. Steadies attention before something demanding.' },
+    sleep:     { name: '4-7-8',     steps: [4, 7, 8, 0],     note: 'In for 4, hold for 7, out for 8. Used for winding down at night. If the hold feels long, try Unwind first.' },
+    custom:    { name: 'Custom',    steps: [4, 0, 6, 0],     note: 'Set your own counts in seconds. Holds can be zero.' }
+  };
+  const PHASES = [
+    { key: 'in',      label: 'Breathe in',  bell: 392.0 },
+    { key: 'holdIn',  label: 'Hold',        bell: 329.6 },
+    { key: 'out',     label: 'Breathe out', bell: 293.7 },
+    { key: 'holdOut', label: 'Hold',        bell: 329.6 }
+  ];
+  const STEP_NAMES = ['In', 'Hold', 'Out', 'Hold'];
+  const LENGTHS = [1, 3, 5, 10, 20];
+  const SOUNDS = [['off', 'Silent'], ['bell', 'Bell'], ['tone', 'Tone']];
+  const STORE = 'tidal-breath-v1';
+  const MIN_SCALE = 0.42;
+  const CIRC = 2 * Math.PI * 97;
+  const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
+
+  const $ = id => document.getElementById(id);
+  const app = $('app'), orb = $('orb'), halo = $('halo'), prog = $('prog');
+  const phaseEl = $('phase'), countEl = $('count'), metaEl = $('meta');
+
+  // ---------- saved settings & history (this device only) ----------
+  let data = { pattern: 'resonance', minutes: 5, sound: 'bell', custom: [4, 0, 6, 0], log: [] };
+  try { Object.assign(data, JSON.parse(localStorage.getItem(STORE)) || {}); } catch (e) {}
+  PATTERNS.custom.steps = data.custom.slice();
+  const save = () => { try { localStorage.setItem(STORE, JSON.stringify(data)); } catch (e) {} };
+
+  const dayKey = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  function renderStats() {
+    const log = data.log || [];
+    if (!log.length) { $('stats').textContent = 'Sessions are tallied here'; return; }
+    const today = dayKey(new Date());
+    const todayMin = log.filter(s => s.day === today).reduce((a, s) => a + s.min, 0);
+    const days = new Set(log.map(s => s.day));
+    const d = new Date();
+    if (!days.has(today)) d.setDate(d.getDate() - 1);
+    let streak = 0;
+    while (days.has(dayKey(d))) { streak++; d.setDate(d.getDate() - 1); }
+    const parts = [`Today ${Math.round(todayMin)} min`];
+    if (streak > 1) parts.push(`${streak}-day streak`);
+    parts.push(`${log.length} session${log.length === 1 ? '' : 's'}`);
+    $('stats').textContent = parts.join(' · ');
+  }
+
+  // ---------- helpers ----------
+  const fmtSec = s => (Number.isInteger(s) ? String(s) : s.toFixed(1));
+  const cycleSecs = steps => steps.reduce((a, b) => a + b, 0);
+  const bpm = steps => 60 / cycleSecs(steps);
+  const fmtClock = ms => { const s = Math.max(0, Math.ceil(ms / 1000)); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; };
+  const ease = p => (1 - Math.cos(Math.PI * p)) / 2;
+  const current = () => PATTERNS[data.pattern];
+
+  function buildCycle(steps) {
+    let t = 0;
+    return steps.map((s, i) => { const p = { ...PHASES[i], dur: s * 1000, start: t }; t += s * 1000; return p; })
+      .filter(p => p.dur > 0);
+  }
+
+  function setLevel(l) {
+    if (reducedMotion.matches) {
+      orb.style.transform = halo.style.transform = 'scale(0.78)';
+      orb.style.opacity = 0.45 + 0.55 * l;
+      halo.style.opacity = 0.15 + 0.3 * l;
+    } else {
+      const s = MIN_SCALE + (1 - MIN_SCALE) * l;
+      orb.style.transform = `scale(${s})`;
+      orb.style.opacity = 1;
+      halo.style.transform = `scale(${s * 1.08})`;
+      halo.style.opacity = 0.2 + 0.25 * l;
+    }
+  }
+  function setProgress(p) { prog.style.strokeDashoffset = CIRC * (1 - p); }
+  prog.style.strokeDasharray = CIRC;
+
+  // ---------- controls ----------
+  function chipRow(el, items, isOn, onPick) {
+    el.innerHTML = '';
+    items.forEach(([value, label]) => {
+      const b = document.createElement('button');
+      b.className = 'chip';
+      b.type = 'button';
+      b.id = `${el.id}-${value}`;
+      b.textContent = label;
+      b.setAttribute('aria-pressed', isOn(value));
+      b.addEventListener('click', () => { onPick(value); renderControls(); });
+      el.appendChild(b);
+    });
+  }
+
+  function renderCustom() {
+    const box = $('custom');
+    box.innerHTML = '';
+    data.custom.forEach((v, i) => {
+      const min = i % 2 === 0 ? 1 : 0;
+      const wrap = document.createElement('div');
+      wrap.className = 'step';
+      wrap.innerHTML = `<span>${STEP_NAMES[i]}</span><output>${fmtSec(v)}</output>
+        <div class="pm"><button type="button" id="step-${i}-dn" aria-label="Shorter ${STEP_NAMES[i]}">−</button><button type="button" id="step-${i}-up" aria-label="Longer ${STEP_NAMES[i]}">+</button></div>`;
+      const change = d => {
+        data.custom[i] = Math.min(15, Math.max(min, data.custom[i] + d));
+        PATTERNS.custom.steps = data.custom.slice();
+        save(); renderControls();
+      };
+      wrap.querySelector(`#step-${i}-dn`).addEventListener('click', () => change(-0.5));
+      wrap.querySelector(`#step-${i}-up`).addEventListener('click', () => change(0.5));
+      box.appendChild(wrap);
+    });
+  }
+
+  function renderControls() {
+    chipRow($('patterns'), Object.entries(PATTERNS).map(([k, p]) => [k, p.name]), v => v === data.pattern, v => { data.pattern = v; save(); });
+    chipRow($('lengths'), LENGTHS.map(m => [m, `${m} min`]), v => v === data.minutes, v => { data.minutes = v; save(); });
+    chipRow($('sounds'), SOUNDS, v => v === data.sound, v => { data.sound = v; save(); });
+    $('note').textContent = current().note;
+    $('custom').hidden = data.pattern !== 'custom';
+    if (data.pattern === 'custom') renderCustom();
+    if (!run) showIdle();
+  }
+
+  function showIdle() {
+    const st = current().steps;
+    phaseEl.textContent = current().name;
+    countEl.textContent = st.map((s, i) => (s || i % 2 === 0) ? fmtSec(s) : null).filter(Boolean).join(' · ');
+    metaEl.textContent = `${bpm(st).toFixed(1)} breaths / min · ${data.minutes} min`;
+    setLevel(0.3);
+    setProgress(0);
+  }
+
+  // ---------- sound ----------
+  let ac = null, tone = null;
+  function ensureAudio() {
+    if (data.sound === 'off') return;
+    // Mix with music from other apps instead of pausing it (Safari 16.4+)
+    try { if (navigator.audioSession) navigator.audioSession.type = 'ambient'; } catch (e) {}
+    try {
+      ac = ac || new (window.AudioContext || window.webkitAudioContext)();
+      if (ac.state === 'suspended') ac.resume();
+    } catch (e) { ac = null; }
+  }
+  function bell(freq) {
+    if (!ac || data.sound !== 'bell') return;
+    const t = ac.currentTime;
+    [[1, 0.14, 3], [2.76, 0.03, 1.4], [5.4, 0.01, 0.8]].forEach(([m, a, len]) => {
+      const o = ac.createOscillator(), g = ac.createGain();
+      o.type = 'sine';
+      o.frequency.value = freq * m;
+      g.gain.setValueAtTime(0, t);
+      g.gain.linearRampToValueAtTime(a, t + 0.012);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + len);
+      o.connect(g).connect(ac.destination);
+      o.start(t); o.stop(t + len + 0.1);
+    });
+  }
+  function startTone() {
+    if (!ac || data.sound !== 'tone') return;
+    const g = ac.createGain(); g.gain.value = 0; g.connect(ac.destination);
+    const o1 = ac.createOscillator(), o2 = ac.createOscillator(), g2 = ac.createGain();
+    o1.type = o2.type = 'sine';
+    g2.gain.value = 0.3;
+    o1.connect(g); o2.connect(g2).connect(g);
+    o1.start(); o2.start();
+    tone = { g, o1, o2 };
+  }
+  function updateTone(l, quiet) {
+    if (!tone) return;
+    const t = ac.currentTime, f = 146.8 + l * 49;
+    tone.o1.frequency.setTargetAtTime(f, t, 0.05);
+    tone.o2.frequency.setTargetAtTime(f * 1.5, t, 0.05);
+    tone.g.gain.setTargetAtTime(quiet ? 0 : 0.03 + l * 0.08, t, 0.1);
+  }
+  function stopTone() {
+    if (!tone) return;
+    const old = tone; tone = null;
+    old.g.gain.setTargetAtTime(0, ac.currentTime, 0.3);
+    setTimeout(() => { try { old.o1.stop(); old.o2.stop(); } catch (e) {} }, 1500);
+  }
+
+  // ---------- keep screen awake ----------
+  let wake = null;
+  async function holdWake() { try { wake = await navigator.wakeLock.request('screen'); } catch (e) { wake = null; } }
+  function dropWake() { try { wake && wake.release(); } catch (e) {} wake = null; }
+  document.addEventListener('visibilitychange', () => { if (run && document.visibilityState === 'visible') holdWake(); });
+
+  // ---------- session ----------
+  let run = null;
+  const PREP = 3000;
+
+  function start() {
+    const steps = current().steps.slice();
+    const cycle = buildCycle(steps);
+    const cycleLen = cycleSecs(steps) * 1000;
+    const total = data.minutes * 60000;
+    run = { cycle, cycleLen, endT: Math.ceil(total / cycleLen) * cycleLen, t: -PREP, last: performance.now(), paused: false, phaseIdx: -1 };
+    ensureAudio();
+    startTone();
+    holdWake();
+    app.classList.add('running');
+    $('controls').hidden = true;
+    $('sessionBar').hidden = false;
+    $('pause').textContent = 'Pause';
+    metaEl.textContent = `${current().name} · ${bpm(steps).toFixed(1)} breaths / min`;
+    requestAnimationFrame(frame);
+  }
+
+  function frame(now) {
+    if (!run) return;
+    if (!run.paused) run.t += now - run.last;
+    run.last = now;
+
+    if (run.t >= run.endT) { finish(); return; }
+    $('remaining').textContent = fmtClock(run.endT - Math.max(0, run.t));
+
+    if (run.t < 0) {
+      phaseEl.textContent = run.paused ? 'Paused' : 'Settle in';
+      countEl.textContent = String(Math.ceil(-run.t / 1000));
+      setLevel(0); setProgress(0); updateTone(0, true);
+    } else {
+      const pos = run.t % run.cycleLen;
+      let i = run.cycle.length - 1;
+      while (i > 0 && pos < run.cycle[i].start) i--;
+      const ph = run.cycle[i];
+      const p = Math.min(1, (pos - ph.start) / ph.dur);
+      if (i !== run.phaseIdx) { run.phaseIdx = i; if (!run.paused) bell(ph.bell); }
+      const l = ph.key === 'in' ? ease(p) : ph.key === 'out' ? 1 - ease(p) : ph.key === 'holdIn' ? 1 : 0;
+      phaseEl.textContent = run.paused ? 'Paused' : ph.label;
+      countEl.textContent = String(Math.max(1, Math.ceil((ph.dur - p * ph.dur) / 1000)));
+      setLevel(l); setProgress(p); updateTone(l, run.paused);
+    }
+    requestAnimationFrame(frame);
+  }
+
+  function togglePause() {
+    if (!run) return;
+    run.paused = !run.paused;
+    $('pause').textContent = run.paused ? 'Resume' : 'Pause';
+    if (!run.paused) run.phaseIdx = -1; // ring the bell again on resume
+  }
+
+  function finish() {
+    const ms = Math.max(0, Math.min(run.t, run.endT));
+    run = null;
+    stopTone(); dropWake();
+    const min = ms / 60000;
+    if (min >= 0.5) {
+      data.log = (data.log || []).concat({ day: dayKey(new Date()), min: Math.round(min * 10) / 10, p: data.pattern }).slice(-1000);
+      save(); renderStats();
+    }
+    app.classList.remove('running');
+    $('controls').hidden = false;
+    $('sessionBar').hidden = true;
+    if (min >= 0.5) {
+      phaseEl.textContent = 'Well done';
+      countEl.textContent = `${Math.round(min * 10) / 10} min`;
+      setLevel(0.3); setProgress(1);
+      metaEl.textContent = 'Notice how you feel now.';
+      setTimeout(() => { if (!run) showIdle(); }, 6000);
+    } else {
+      showIdle();
+    }
+  }
+
+  $('start').addEventListener('click', start);
+  $('pause').addEventListener('click', togglePause);
+  $('end').addEventListener('click', () => { if (run) { run.endT = Math.min(run.endT, Math.max(0, run.t)); finish(); } });
+  reducedMotion.addEventListener?.('change', () => { if (!run) showIdle(); });
+
+  renderStats();
+  renderControls();
+})();
+</script>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(() => {}); });
+}
+</script>
+</body>
+</html>
