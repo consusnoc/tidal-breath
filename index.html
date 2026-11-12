@@ -36,6 +36,9 @@ body { margin: 0; overscroll-behavior: none; }
   --core: #f0c67f;
   --accent: #2f6b62;
   --accent-ink: #f4f8f6;
+  --yoga: #c98a3c;
+  --med: #6e7fae;
+  --danger: #a64b3c;
   --font-display: "Cormorant Garamond", "Iowan Old Style", Georgia, serif;
   --font-body: "Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
 }
@@ -53,6 +56,9 @@ body { margin: 0; overscroll-behavior: none; }
     --core: #e6b86c;
     --accent: #8cc4b7;
     --accent-ink: #0d1716;
+  --yoga: #e0a95e;
+  --med: #9aa9d4;
+  --danger: #e38b78;
     color-scheme: dark;
   }
 }
@@ -69,6 +75,9 @@ body { margin: 0; overscroll-behavior: none; }
   --core: #e6b86c;
   --accent: #8cc4b7;
   --accent-ink: #0d1716;
+  --yoga: #e0a95e;
+  --med: #9aa9d4;
+  --danger: #e38b78;
   color-scheme: dark;
 }
 
@@ -177,6 +186,51 @@ button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .bar-buttons { display: flex; gap: 8px; }
 .ghost { border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 11px 18px; font-size: 14px; font-weight: 500; cursor: pointer; }
 
+/* Breathe / Practice log switch */
+.tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 4px; border-radius: 999px; background: var(--surface); border: 1px solid var(--line); }
+.tabs button { border: 0; background: transparent; border-radius: 999px; padding: 9px 12px; font-size: 14px; font-weight: 500; color: var(--ink-soft); cursor: pointer; }
+.tabs button[aria-selected="true"] { background: var(--ink); color: var(--bg-top); }
+.app.running .tabs { display: none; }
+.view { flex: 1; display: flex; flex-direction: column; gap: 8px; min-height: 0; }
+
+/* Practice log */
+.log { gap: 22px; padding-top: 8px; padding-bottom: 64px; }
+.totals { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+.total { display: grid; gap: 2px; padding: 12px 10px; border-radius: 14px; background: var(--surface); border: 1px solid var(--line); }
+.total b { font-size: 22px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.total span { font-size: 12px; color: var(--ink-soft); display: flex; align-items: center; gap: 6px; }
+.dot { width: 8px; height: 8px; border-radius: 50%; flex: none; background: var(--orb); }
+.dot.yoga { background: var(--yoga); }
+.dot.meditation { background: var(--med); }
+.week-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.week-head span { font-size: 13px; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+.week { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; align-items: end; height: 110px; }
+.day { display: grid; grid-template-rows: 1fr auto; gap: 6px; height: 100%; justify-items: center; }
+.stack { width: 100%; max-width: 30px; display: flex; flex-direction: column-reverse; align-self: end; border-radius: 6px; overflow: hidden; min-height: 3px; background: var(--line); }
+.stack i { display: block; background: var(--orb); }
+.stack i.yoga { background: var(--yoga); }
+.stack i.meditation { background: var(--med); }
+.day small { font-size: 11px; color: var(--ink-soft); }
+.day.today small { color: var(--ink); font-weight: 600; }
+.add { display: grid; gap: 12px; padding: 16px; border-radius: 18px; background: var(--surface); border: 1px solid var(--line); }
+.row { display: flex; gap: 8px; flex-wrap: wrap; }
+.field { display: grid; gap: 4px; flex: 1 1 130px; min-width: 0; }
+.field span { font-size: 12px; color: var(--ink-soft); }
+.add input { font: inherit; font-size: 16px; color: var(--ink); background: var(--surface-strong); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; width: 100%; box-sizing: border-box; min-width: 0; }
+.add input:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.history { list-style: none; margin: 0; padding: 0; display: grid; }
+.history li { display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto; align-items: center; gap: 10px; padding: 11px 0; border-bottom: 1px solid var(--line); }
+.history .what { min-width: 0; }
+.history .what b { font-weight: 500; }
+.history .what small { display: block; color: var(--ink-soft); font-size: 12.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.history .mins { font-variant-numeric: tabular-nums; font-weight: 500; }
+.history .del { border: 0; background: transparent; color: var(--ink-soft); font-size: 13px; padding: 6px; cursor: pointer; }
+.history .del:hover { color: var(--danger); }
+.empty { color: var(--ink-soft); font-size: 14px; padding: 8px 0; margin: 0; }
+.more { justify-self: start; }
+.toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(20px + env(safe-area-inset-bottom, 0px)); display: flex; align-items: center; gap: 14px; padding: 10px 10px 10px 18px; border-radius: 999px; background: var(--ink); color: var(--bg-top); font-size: 14px; box-shadow: 0 6px 24px rgba(0, 0, 0, 0.2); z-index: 20; max-width: calc(100% - 32px); }
+.toast button { border: 0; border-radius: 999px; padding: 7px 14px; background: var(--bg-top); color: var(--ink); font-weight: 600; cursor: pointer; }
+
 @media (max-height: 640px) {
   .controls { gap: 12px; }
   .note { display: none; }
@@ -191,6 +245,12 @@ button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
     <div class="stats" id="stats"></div>
   </header>
 
+  <nav class="tabs" role="tablist" aria-label="Views">
+    <button type="button" role="tab" id="tab-breathe" aria-controls="breatheView" aria-selected="true">Breathe</button>
+    <button type="button" role="tab" id="tab-log" aria-controls="logView" aria-selected="false">Practice log</button>
+  </nav>
+
+  <div class="view" id="breatheView" role="tabpanel" aria-labelledby="tab-breathe">
   <main class="stage">
     <div class="orb-wrap">
       <svg class="ring" viewBox="0 0 200 200" aria-hidden="true">
@@ -232,7 +292,35 @@ button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
       <button class="ghost" id="end">End</button>
     </div>
   </section>
+  </div>
+
+  <div class="view log" id="logView" role="tabpanel" aria-labelledby="tab-log" hidden>
+    <section class="group">
+      <div class="week-head"><div class="label">Last 7 days</div><span id="weekTotal"></span></div>
+      <div class="totals" id="totals"></div>
+      <div class="week" id="week" aria-label="Minutes practised each day"></div>
+    </section>
+
+    <form class="add" id="addForm" autocomplete="off">
+      <div class="label">Add a practice</div>
+      <div class="chips" id="logType"></div>
+      <div class="chips" id="logQuick"></div>
+      <div class="row">
+        <label class="field"><span>Minutes</span><input type="number" id="logMinutes" inputmode="numeric" min="1" max="600" step="1" required></label>
+        <label class="field"><span>Date</span><input type="date" id="logDate" required></label>
+      </div>
+      <label class="field"><span>Note (optional)</span><input type="text" id="logNote" maxlength="80" placeholder="Vinyasa class, yoga nidra, walking meditation…"></label>
+      <button class="start" type="submit" id="logSave">Save practice</button>
+    </form>
+
+    <section class="group">
+      <div class="label">History</div>
+      <ul class="history" id="history"></ul>
+      <button class="ghost more" type="button" id="showMore" hidden>Show more</button>
+    </section>
+  </div>
 </div>
+<div class="toast" id="toast" role="status" hidden><span id="toastText"></span><button type="button" id="toastUndo">Undo</button></div>
 
 <script>
 (() => {
@@ -265,6 +353,8 @@ button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
   let data = { pattern: 'resonance', minutes: 5, sound: 'bell', custom: [4, 0, 6, 0], log: [] };
   try { Object.assign(data, JSON.parse(localStorage.getItem(STORE)) || {}); } catch (e) {}
   PATTERNS.custom.steps = data.custom.slice();
+  // Older entries are breathing sessions without a type or id
+  data.log = (data.log || []).map((s, i) => ({ type: 'breath', ts: Date.parse(s.day) + i, ...s }));
   const save = () => { try { localStorage.setItem(STORE, JSON.stringify(data)); } catch (e) {} };
 
   const dayKey = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
@@ -484,8 +574,8 @@ button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
     stopTone(); dropWake();
     const min = ms / 60000;
     if (min >= 0.5) {
-      data.log = (data.log || []).concat({ day: dayKey(new Date()), min: Math.round(min * 10) / 10, p: data.pattern }).slice(-1000);
-      save(); renderStats();
+      data.log.push({ type: 'breath', day: dayKey(new Date()), min: Math.round(min * 10) / 10, p: data.pattern, ts: Date.now() });
+      save(); renderStats(); renderLog();
     }
     app.classList.remove('running');
     $('controls').hidden = false;
@@ -506,8 +596,193 @@ button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
   $('end').addEventListener('click', () => { if (run) { run.endT = Math.min(run.endT, Math.max(0, run.t)); finish(); } });
   reducedMotion.addEventListener?.('change', () => { if (!run) showIdle(); });
 
+  // ---------- practice log ----------
+  const TYPES = { breath: 'Breathing', yoga: 'Yoga', meditation: 'Meditation' };
+  const QUICK = [10, 15, 20, 30, 45, 60];
+  let logType = 'yoga', shown = 20, lastRemoved = null, toastTimer = 0;
+
+  const parseDay = k => { const [y, m, d] = k.split('-').map(Number); return new Date(y, m - 1, d); };
+  const sum = (items, type) => items.filter(s => !type || s.type === type).reduce((a, s) => a + s.min, 0);
+  function fmtMin(m) {
+    m = Math.round(m);
+    if (m < 60) return `${m} min`;
+    return m % 60 ? `${Math.floor(m / 60)} h ${m % 60} min` : `${m / 60} h`;
+  }
+  function dayLabel(k) {
+    const today = new Date(), y = new Date();
+    y.setDate(y.getDate() - 1);
+    if (k === dayKey(today)) return 'Today';
+    if (k === dayKey(y)) return 'Yesterday';
+    return parseDay(k).toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'short' });
+  }
+
+  function renderLog() {
+    const log = data.log;
+    const days = [...Array(7)].map((_, i) => { const d = new Date(); d.setDate(d.getDate() - 6 + i); return d; });
+    const keys = days.map(dayKey);
+    const recent = log.filter(s => keys.includes(s.day));
+
+    $('totals').innerHTML = '';
+    Object.entries(TYPES).forEach(([t, name]) => {
+      const el = document.createElement('div');
+      el.className = 'total';
+      el.innerHTML = `<b>${Math.round(sum(recent, t))}</b><span><i class="dot ${t}"></i>${name} min</span>`;
+      $('totals').appendChild(el);
+    });
+    $('weekTotal').textContent = `${fmtMin(sum(recent))} · ${new Set(recent.map(s => s.day)).size} of 7 days`;
+
+    const perDay = keys.map(k => log.filter(s => s.day === k));
+    const max = Math.max(30, ...perDay.map(items => sum(items)));
+    $('week').innerHTML = '';
+    perDay.forEach((items, i) => {
+      const total = sum(items);
+      const col = document.createElement('div');
+      col.className = 'day' + (i === 6 ? ' today' : '');
+      col.title = `${dayLabel(keys[i])}: ${fmtMin(total)}`;
+      const stack = document.createElement('div');
+      stack.className = 'stack';
+      stack.style.height = total ? `${Math.max(6, (total / max) * 100)}%` : '3px';
+      Object.keys(TYPES).forEach(t => {
+        const m = sum(items, t);
+        if (!m) return;
+        const seg = document.createElement('i');
+        seg.className = t;
+        seg.style.flex = `${m} 1 0px`;
+        stack.appendChild(seg);
+      });
+      const label = document.createElement('small');
+      label.textContent = days[i].toLocaleDateString(undefined, { weekday: 'narrow' });
+      col.append(stack, label);
+      $('week').appendChild(col);
+    });
+
+    const sorted = log.slice().sort((a, b) => b.day.localeCompare(a.day) || b.ts - a.ts);
+    const ul = $('history');
+    ul.innerHTML = '';
+    if (!sorted.length) {
+      const li = document.createElement('li');
+      li.className = 'empty';
+      li.style.display = 'block';
+      li.textContent = 'Nothing logged yet. Add a yoga or meditation practice above, or finish a breathing session.';
+      ul.appendChild(li);
+    }
+    sorted.slice(0, shown).forEach(s => {
+      const li = document.createElement('li');
+      const dot = document.createElement('i');
+      dot.className = `dot ${s.type}`;
+      const what = document.createElement('div');
+      what.className = 'what';
+      const name = document.createElement('b');
+      name.textContent = TYPES[s.type] || s.type;
+      const detail = document.createElement('small');
+      const extra = s.note || (s.type === 'breath' && PATTERNS[s.p] ? PATTERNS[s.p].name : '');
+      detail.textContent = extra ? `${dayLabel(s.day)} · ${extra}` : dayLabel(s.day);
+      what.append(name, detail);
+      const mins = document.createElement('span');
+      mins.className = 'mins';
+      mins.textContent = fmtMin(s.min);
+      const del = document.createElement('button');
+      del.type = 'button';
+      del.className = 'del';
+      del.textContent = 'Remove';
+      del.setAttribute('aria-label', `Remove ${name.textContent}, ${detail.textContent}`);
+      del.addEventListener('click', () => removeEntry(s.ts));
+      li.append(dot, what, mins, del);
+      ul.appendChild(li);
+    });
+    $('showMore').hidden = sorted.length <= shown;
+  }
+
+  function renderForm() {
+    const typeRow = $('logType');
+    typeRow.innerHTML = '';
+    Object.entries(TYPES).forEach(([t, name]) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'chip';
+      b.id = `logType-${t}`;
+      b.textContent = name;
+      b.setAttribute('aria-pressed', t === logType);
+      b.addEventListener('click', () => { logType = t; renderForm(); });
+      typeRow.appendChild(b);
+    });
+    const quick = $('logQuick');
+    quick.innerHTML = '';
+    QUICK.forEach(m => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'chip';
+      b.id = `logQuick-${m}`;
+      b.textContent = `${m} min`;
+      b.setAttribute('aria-pressed', Number($('logMinutes').value) === m);
+      b.addEventListener('click', () => { $('logMinutes').value = m; renderForm(); });
+      quick.appendChild(b);
+    });
+  }
+
+  function showToast(text, canUndo) {
+    $('toastText').textContent = text;
+    $('toastUndo').hidden = !canUndo;
+    $('toast').hidden = false;
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(hideToast, 5000);
+  }
+  function hideToast() { $('toast').hidden = true; lastRemoved = null; }
+
+  function removeEntry(ts) {
+    const i = data.log.findIndex(s => s.ts === ts);
+    if (i < 0) return;
+    const entry = data.log.splice(i, 1)[0];
+    save(); renderLog(); renderStats();
+    showToast(`Removed ${(TYPES[entry.type] || '').toLowerCase()}, ${fmtMin(entry.min)}`, true);
+    lastRemoved = { entry, index: i };
+  }
+  $('toastUndo').addEventListener('click', () => {
+    if (lastRemoved) {
+      data.log.splice(lastRemoved.index, 0, lastRemoved.entry);
+      save(); renderLog(); renderStats();
+    }
+    hideToast();
+  });
+
+  $('logMinutes').value = 30;
+  $('logDate').value = $('logDate').max = dayKey(new Date());
+  $('logMinutes').addEventListener('input', renderForm);
+  $('addForm').addEventListener('submit', e => {
+    e.preventDefault();
+    const min = Math.round(Number($('logMinutes').value));
+    const day = $('logDate').value;
+    if (!(min >= 1) || !/^\d{4}-\d{2}-\d{2}$/.test(day)) return;
+    const entry = { type: logType, day, min: Math.min(600, min), ts: Date.now() };
+    const note = $('logNote').value.trim();
+    if (note) entry.note = note;
+    data.log.push(entry);
+    save(); renderLog(); renderStats();
+    $('logNote').value = '';
+    showToast(`Saved ${TYPES[logType].toLowerCase()}, ${fmtMin(entry.min)}`, false);
+  });
+  $('showMore').addEventListener('click', () => { shown += 20; renderLog(); });
+
+  function showView(v) {
+    const isLog = v === 'log';
+    $('breatheView').hidden = isLog;
+    $('logView').hidden = !isLog;
+    $('tab-breathe').setAttribute('aria-selected', !isLog);
+    $('tab-log').setAttribute('aria-selected', isLog);
+    if (isLog) {
+      $('logDate').value = $('logDate').max = dayKey(new Date());
+      renderLog();
+    }
+    window.scrollTo(0, 0);
+  }
+  $('tab-breathe').addEventListener('click', () => showView('breathe'));
+  $('tab-log').addEventListener('click', () => showView('log'));
+
   renderStats();
   renderControls();
+  renderForm();
+  renderLog();
+  if (location.hash === '#log') showView('log');
 })();
 </script>
 <script>

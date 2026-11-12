@@ -1,5 +1,5 @@
 // Keeps Tidal Breath working offline. Bump VERSION when any app file changes.
-const VERSION = 'tidal-breath-v2';
+const VERSION = 'tidal-breath-v3';
 const APP_FILES = [
   './',
   'index.html',
