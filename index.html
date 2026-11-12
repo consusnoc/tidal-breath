@@ -39,6 +39,13 @@ body { margin: 0; overscroll-behavior: none; }
   --yoga: #c98a3c;
   --med: #6e7fae;
   --danger: #a64b3c;
+  --move: #c98a3c;
+  --still: #5f9187;
+  --restore: #b8606f;
+  --p1: #4f9466;
+  --fire: #cf5233;
+  --p2: #3a86ad;
+  --nurture: #85679f;
   --font-display: "Cormorant Garamond", "Iowan Old Style", Georgia, serif;
   --font-body: "Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
 }
@@ -59,6 +66,13 @@ body { margin: 0; overscroll-behavior: none; }
   --yoga: #e0a95e;
   --med: #9aa9d4;
   --danger: #e38b78;
+  --move: #e0a95e;
+  --still: #7fb8ab;
+  --restore: #e29aa7;
+  --p1: #7cc28f;
+  --fire: #f07a5c;
+  --p2: #6fb6dc;
+  --nurture: #b99ad6;
     color-scheme: dark;
   }
 }
@@ -78,6 +92,13 @@ body { margin: 0; overscroll-behavior: none; }
   --yoga: #e0a95e;
   --med: #9aa9d4;
   --danger: #e38b78;
+  --move: #e0a95e;
+  --still: #7fb8ab;
+  --restore: #e29aa7;
+  --p1: #7cc28f;
+  --fire: #f07a5c;
+  --p2: #6fb6dc;
+  --nurture: #b99ad6;
   color-scheme: dark;
 }
 
@@ -193,43 +214,97 @@ button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .app.running .tabs { display: none; }
 .view { flex: 1; display: flex; flex-direction: column; gap: 8px; min-height: 0; }
 
-/* Practice log */
+/* Practice: weekly tide, chart, form, history, moments, settings */
 .log { gap: 22px; padding-top: 8px; padding-bottom: 64px; }
+.dot { width: 8px; height: 8px; border-radius: 50%; flex: none; background: var(--still); }
+.dot.move, .stack i.move, .water.move { background: var(--move); }
+.dot.still, .stack i.still, .water.still { background: var(--still); }
+.dot.restore, .stack i.restore, .water.restore { background: var(--restore); }
+
+.tide { display: grid; gap: 16px; padding: 18px 16px; border-radius: 20px; background: var(--surface); border: 1px solid var(--line); }
+.tide.high { border-color: var(--accent); }
+.phase-line { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 13px; color: var(--ink-soft); }
+.phase-pill { display: inline-flex; align-items: center; gap: 6px; padding: 5px 11px; border-radius: 999px; font-weight: 600; color: var(--ink); background: var(--surface-strong); border: 1px solid var(--line); }
+.phase-pill i { width: 8px; height: 8px; border-radius: 50%; background: var(--ph, var(--ink-soft)); }
+.link { border: 0; background: none; padding: 0; color: var(--accent); font-weight: 600; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; font-size: inherit; }
+.week-title { display: flex; justify-content: space-between; align-items: end; gap: 12px; }
+.week-title h2 { margin: 4px 0 0; font-family: var(--font-display); font-weight: 500; font-size: 32px; line-height: 1.05; text-wrap: balance; }
+.streak { text-align: right; font-size: 12px; color: var(--ink-soft); flex: none; }
+.streak b { display: block; font-size: 26px; font-weight: 600; color: var(--ink); font-variant-numeric: tabular-nums; }
+.pools { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.pool { display: grid; gap: 6px; justify-items: center; text-align: center; }
+.vessel { position: relative; width: 100%; max-width: 84px; height: 104px; border-radius: 22px 22px 28px 28px; border: 1.5px solid var(--line); overflow: hidden; background: var(--surface-strong); }
+.vessel.met { border-color: var(--ink); }
+.water { position: absolute; left: 0; right: 0; bottom: 0; opacity: 0.88; transition: height 0.9s cubic-bezier(0.3, 0.7, 0.3, 1); }
+.water::before { content: ""; position: absolute; left: -15%; right: -15%; top: -5px; height: 10px; border-radius: 50%; background: inherit; }
+.water[data-empty] { display: none; }
+.vessel .check { position: absolute; inset: 0; display: grid; place-items: center; font-size: 22px; color: var(--bg-top); font-weight: 700; }
+.pool b { font-size: 14px; font-weight: 600; }
+.pool small { font-size: 12px; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+.tide-msg { margin: 0; font-size: 14px; line-height: 1.45; }
+
 .totals { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
 .total { display: grid; gap: 2px; padding: 12px 10px; border-radius: 14px; background: var(--surface); border: 1px solid var(--line); }
 .total b { font-size: 22px; font-weight: 600; font-variant-numeric: tabular-nums; }
 .total span { font-size: 12px; color: var(--ink-soft); display: flex; align-items: center; gap: 6px; }
-.dot { width: 8px; height: 8px; border-radius: 50%; flex: none; background: var(--orb); }
-.dot.yoga { background: var(--yoga); }
-.dot.meditation { background: var(--med); }
 .week-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
 .week-head span { font-size: 13px; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
-.week { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; align-items: end; height: 110px; }
-.day { display: grid; grid-template-rows: 1fr auto; gap: 6px; height: 100%; justify-items: center; }
+.week { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; height: 120px; }
+.day { display: grid; grid-template-rows: 1fr auto auto; gap: 5px; height: 100%; justify-items: center; }
+.day.future { opacity: 0.55; }
 .stack { width: 100%; max-width: 30px; display: flex; flex-direction: column-reverse; align-self: end; border-radius: 6px; overflow: hidden; min-height: 3px; background: var(--line); }
-.stack i { display: block; background: var(--orb); }
-.stack i.yoga { background: var(--yoga); }
-.stack i.meditation { background: var(--med); }
+.stack i { display: block; }
+.ph { width: 100%; max-width: 30px; height: 4px; border-radius: 2px; background: var(--ph, var(--line)); }
+.ph.est { opacity: 0.4; }
 .day small { font-size: 11px; color: var(--ink-soft); }
-.day.today small { color: var(--ink); font-weight: 600; }
+.day.today small { color: var(--ink); font-weight: 700; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 12px; color: var(--ink-soft); }
+.legend span { display: inline-flex; align-items: center; gap: 5px; }
+.legend i { width: 12px; height: 4px; border-radius: 2px; background: var(--ph); }
+
 .add { display: grid; gap: 12px; padding: 16px; border-radius: 18px; background: var(--surface); border: 1px solid var(--line); }
+.chip.new { border-style: dashed; }
+.new-act { display: grid; gap: 10px; padding: 12px; border-radius: 14px; border: 1px dashed var(--line); }
 .row { display: flex; gap: 8px; flex-wrap: wrap; }
 .field { display: grid; gap: 4px; flex: 1 1 130px; min-width: 0; }
 .field span { font-size: 12px; color: var(--ink-soft); }
-.add input { font: inherit; font-size: 16px; color: var(--ink); background: var(--surface-strong); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; width: 100%; box-sizing: border-box; min-width: 0; }
-.add input:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.self-end { align-self: end; }
+.log input, .log select { font: inherit; font-size: 16px; color: var(--ink); background: var(--surface-strong); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; width: 100%; box-sizing: border-box; min-width: 0; }
+.log input:focus-visible, .log select:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+
 .history { list-style: none; margin: 0; padding: 0; display: grid; }
 .history li { display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto; align-items: center; gap: 10px; padding: 11px 0; border-bottom: 1px solid var(--line); }
 .history .what { min-width: 0; }
 .history .what b { font-weight: 500; }
 .history .what small { display: block; color: var(--ink-soft); font-size: 12.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .history .mins { font-variant-numeric: tabular-nums; font-weight: 500; }
-.history .del { border: 0; background: transparent; color: var(--ink-soft); font-size: 13px; padding: 6px; cursor: pointer; }
-.history .del:hover { color: var(--danger); }
+.del { border: 0; background: transparent; color: var(--ink-soft); font-size: 13px; padding: 6px; cursor: pointer; }
+.del:hover { color: var(--danger); }
 .empty { color: var(--ink-soft); font-size: 14px; padding: 8px 0; margin: 0; }
 .more { justify-self: start; }
+
+.moments { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; }
+.moments li { padding: 7px 12px; border-radius: 999px; background: var(--surface-strong); border: 1px solid var(--line); font-size: 13px; }
+.moments li.empty { background: none; border: 0; padding: 0; }
+
+.settings { border-radius: 18px; background: var(--surface); border: 1px solid var(--line); padding: 0 16px; }
+.settings summary { padding: 15px 0; cursor: pointer; font-weight: 600; }
+.set-group { display: grid; gap: 10px; padding-bottom: 20px; }
+.starts li { grid-template-columns: minmax(0, 1fr) auto; }
+.table-wrap { overflow-x: auto; }
+.goals { width: 100%; border-collapse: collapse; font-size: 13px; }
+.goals th, .goals td { padding: 4px; text-align: center; font-weight: 500; }
+.goals th { color: var(--ink-soft); font-size: 12px; }
+.goals td:first-child { text-align: left; white-space: nowrap; }
+.goals td:first-child i { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; background: var(--ph, var(--line)); }
+.goals input { max-width: 60px; text-align: center; padding: 8px 4px; }
+.acts { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.acts li { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 110px) auto; gap: 6px; align-items: center; }
+.acts li.hidden-act input { opacity: 0.5; }
+
 .toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(20px + env(safe-area-inset-bottom, 0px)); display: flex; align-items: center; gap: 14px; padding: 10px 10px 10px 18px; border-radius: 999px; background: var(--ink); color: var(--bg-top); font-size: 14px; box-shadow: 0 6px 24px rgba(0, 0, 0, 0.2); z-index: 20; max-width: calc(100% - 32px); }
 .toast button { border: 0; border-radius: 999px; padding: 7px 14px; background: var(--bg-top); color: var(--ink); font-weight: 600; cursor: pointer; }
+@media (prefers-reduced-motion: reduce) { .water { transition: none; } }
 
 @media (max-height: 640px) {
   .controls { gap: 12px; }
@@ -247,7 +322,7 @@ button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
   <nav class="tabs" role="tablist" aria-label="Views">
     <button type="button" role="tab" id="tab-breathe" aria-controls="breatheView" aria-selected="true">Breathe</button>
-    <button type="button" role="tab" id="tab-log" aria-controls="logView" aria-selected="false">Practice log</button>
+    <button type="button" role="tab" id="tab-log" aria-controls="logView" aria-selected="false">Practice</button>
   </nav>
 
   <div class="view" id="breatheView" role="tabpanel" aria-labelledby="tab-breathe">
@@ -295,21 +370,40 @@ button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
   </div>
 
   <div class="view log" id="logView" role="tabpanel" aria-labelledby="tab-log" hidden>
+    <section class="tide" id="tide">
+      <div class="phase-line" id="phaseLine"></div>
+      <div class="week-title">
+        <div><div class="label" id="weekRange">This week</div><h2 id="weekTitle"></h2></div>
+        <div class="streak"><b id="streakNum">0</b>week streak</div>
+      </div>
+      <div class="pools" id="pools"></div>
+      <p class="tide-msg" id="tideMsg"></p>
+    </section>
+
     <section class="group">
-      <div class="week-head"><div class="label">Last 7 days</div><span id="weekTotal"></span></div>
+      <div class="week-head"><div class="label">Minutes this week</div><span id="weekTotal"></span></div>
       <div class="totals" id="totals"></div>
-      <div class="week" id="week" aria-label="Minutes practised each day"></div>
+      <div class="week" id="week" aria-label="Minutes practised each day this week"></div>
+      <div class="legend" id="legend"></div>
     </section>
 
     <form class="add" id="addForm" autocomplete="off">
       <div class="label">Add a practice</div>
       <div class="chips" id="logType"></div>
+      <div class="new-act" id="newAct" hidden>
+        <label class="field"><span>New activity</span><input type="text" id="newActName" maxlength="30" placeholder="Cold plunge, dance, massage…"></label>
+        <div class="chips" id="newActCat"></div>
+        <div class="row">
+          <button class="ghost" type="button" id="newActAdd">Add activity</button>
+          <button class="ghost" type="button" id="newActCancel">Cancel</button>
+        </div>
+      </div>
       <div class="chips" id="logQuick"></div>
       <div class="row">
         <label class="field"><span>Minutes</span><input type="number" id="logMinutes" inputmode="numeric" min="1" max="600" step="1" required></label>
         <label class="field"><span>Date</span><input type="date" id="logDate" required></label>
       </div>
-      <label class="field"><span>Note (optional)</span><input type="text" id="logNote" maxlength="80" placeholder="Vinyasa class, yoga nidra, walking meditation…"></label>
+      <label class="field"><span>Note (optional)</span><input type="text" id="logNote" maxlength="80" placeholder="Vinyasa class, yoga nidra, 3 sauna rounds…"></label>
       <button class="start" type="submit" id="logSave">Save practice</button>
     </form>
 
@@ -318,6 +412,45 @@ button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
       <ul class="history" id="history"></ul>
       <button class="ghost more" type="button" id="showMore" hidden>Show more</button>
     </section>
+
+    <section class="group">
+      <div class="label">Moments</div>
+      <ul class="moments" id="moments"></ul>
+      <p class="note" id="nextUp"></p>
+    </section>
+
+    <details class="settings" id="settings">
+      <summary>Cycle, goals and activities</summary>
+      <div class="set-group">
+        <div class="label">Period start dates</div>
+        <p class="note">Add the first day of each period. Your phase comes from the latest date, and your average cycle length from the gaps between dates. These dates stay on this phone.</p>
+        <div class="row">
+          <label class="field"><span>First day of period</span><input type="date" id="startDate"></label>
+          <button class="ghost self-end" type="button" id="startAdd">Save date</button>
+          <button class="ghost self-end" type="button" id="startToday">Started today</button>
+        </div>
+        <ul class="history starts" id="starts"></ul>
+        <p class="note" id="cycleLen"></p>
+      </div>
+      <div class="set-group">
+        <div class="label">Phase days</div>
+        <div class="row">
+          <label class="field"><span>Power 1 ends on day</span><input type="number" id="endP1" min="1" max="40" inputmode="numeric"></label>
+          <label class="field"><span>Fire ends on day</span><input type="number" id="endFire" min="2" max="40" inputmode="numeric"></label>
+          <label class="field"><span>Power 2 ends on day</span><input type="number" id="endP2" min="3" max="40" inputmode="numeric"></label>
+        </div>
+        <p class="note">Nurture runs from the next day until your period starts.</p>
+      </div>
+      <div class="set-group">
+        <div class="label">Weekly goals, in days per week</div>
+        <div class="table-wrap"><table class="goals" id="goals"></table></div>
+        <p class="note">Each Monday to Sunday week uses the goals of the phase most of its days fall in.</p>
+      </div>
+      <div class="set-group">
+        <div class="label">Activities</div>
+        <ul class="acts" id="acts"></ul>
+      </div>
+    </details>
   </div>
 </div>
 <div class="toast" id="toast" role="status" hidden><span id="toastText"></span><button type="button" id="toastUndo">Undo</button></div>
@@ -363,13 +496,9 @@ button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
     if (!log.length) { $('stats').textContent = 'Sessions are tallied here'; return; }
     const today = dayKey(new Date());
     const todayMin = log.filter(s => s.day === today).reduce((a, s) => a + s.min, 0);
-    const days = new Set(log.map(s => s.day));
-    const d = new Date();
-    if (!days.has(today)) d.setDate(d.getDate() - 1);
-    let streak = 0;
-    while (days.has(dayKey(d))) { streak++; d.setDate(d.getDate() - 1); }
+    const streak = weekStreak();
     const parts = [`Today ${Math.round(todayMin)} min`];
-    if (streak > 1) parts.push(`${streak}-day streak`);
+    if (streak > 0) parts.push(`${streak}-week streak`);
     parts.push(`${log.length} session${log.length === 1 ? '' : 's'}`);
     $('stats').textContent = parts.join(' · ');
   }
@@ -596,87 +725,278 @@ button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
   $('end').addEventListener('click', () => { if (run) { run.endT = Math.min(run.endT, Math.max(0, run.t)); finish(); } });
   reducedMotion.addEventListener?.('change', () => { if (!run) showIdle(); });
 
-  // ---------- practice log ----------
-  const TYPES = { breath: 'Breathing', yoga: 'Yoga', meditation: 'Meditation' };
+  // ---------- practice: activities, cycle phases, weekly goals ----------
+  const CATS = { move: 'Move', still: 'Still', restore: 'Restore' };
+  const PHASES_ORDER = ['p1', 'fire', 'p2', 'nurture'];
+  const PHASE_NAMES = { p1: 'Power 1', fire: 'Fire', p2: 'Power 2', nurture: 'Nurture', none: 'No cycle set' };
+  const DEFAULT_ACTIVITIES = [
+    { id: 'yoga', name: 'Yoga', cat: 'move' },
+    { id: 'pilates', name: 'Pilates', cat: 'move' },
+    { id: 'kinam', name: 'Kinam', cat: 'move' },
+    { id: 'meditation', name: 'Meditation', cat: 'still' },
+    { id: 'breath', name: 'Breathing', cat: 'still' },
+    { id: 'sauna', name: 'Sauna', cat: 'restore' }
+  ];
+  const DEFAULT_GOALS = {
+    p1: { move: 4, still: 3, restore: 1 },
+    fire: { move: 4, still: 2, restore: 1 },
+    p2: { move: 3, still: 3, restore: 1 },
+    nurture: { move: 1, still: 5, restore: 2 },
+    none: { move: 3, still: 4, restore: 1 }
+  };
+  data.activities = data.activities || DEFAULT_ACTIVITIES.map(a => ({ ...a }));
+  data.goals = data.goals || JSON.parse(JSON.stringify(DEFAULT_GOALS));
+  data.cycle = data.cycle || { starts: [], ends: { p1: 10, fire: 15, p2: 19 } };
+
   const QUICK = [10, 15, 20, 30, 45, 60];
-  let logType = 'yoga', shown = 20, lastRemoved = null, toastTimer = 0;
+  let logActivity = (data.activities.find(a => !a.hidden) || DEFAULT_ACTIVITIES[0]).id;
+  let newActCat = 'move', shown = 20, lastRemoved = null, toastTimer = 0;
 
   const parseDay = k => { const [y, m, d] = k.split('-').map(Number); return new Date(y, m - 1, d); };
-  const sum = (items, type) => items.filter(s => !type || s.type === type).reduce((a, s) => a + s.min, 0);
+  const addDays = (d, n) => { const x = new Date(d.getFullYear(), d.getMonth(), d.getDate()); x.setDate(x.getDate() + n); return x; };
+  const daysBetween = (a, b) => Math.round((parseDay(b) - parseDay(a)) / 86400000);
+  const weekStart = d => addDays(d, -((d.getDay() + 6) % 7));
+  const shortDate = d => d.toLocaleDateString(undefined, { day: 'numeric', month: 'short' });
+  const activity = id => data.activities.find(a => a.id === id) || { id, name: id, cat: 'still' };
+  const catOf = s => activity(s.type).cat;
+  const sum = (items, cat) => items.filter(s => !cat || catOf(s) === cat).reduce((a, s) => a + s.min, 0);
+  const plural = (n, word) => `${n} ${word}${n === 1 ? '' : 's'}`;
   function fmtMin(m) {
     m = Math.round(m);
     if (m < 60) return `${m} min`;
     return m % 60 ? `${Math.floor(m / 60)} h ${m % 60} min` : `${m / 60} h`;
   }
   function dayLabel(k) {
-    const today = new Date(), y = new Date();
-    y.setDate(y.getDate() - 1);
+    const today = new Date();
     if (k === dayKey(today)) return 'Today';
-    if (k === dayKey(y)) return 'Yesterday';
+    if (k === dayKey(addDays(today, -1))) return 'Yesterday';
     return parseDay(k).toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'short' });
   }
 
-  function renderLog() {
-    const log = data.log;
-    const days = [...Array(7)].map((_, i) => { const d = new Date(); d.setDate(d.getDate() - 6 + i); return d; });
-    const keys = days.map(dayKey);
-    const recent = log.filter(s => keys.includes(s.day));
+  function avgCycle() {
+    const s = data.cycle.starts.slice().sort();
+    const gaps = [];
+    for (let i = 1; i < s.length; i++) {
+      const g = daysBetween(s[i - 1], s[i]);
+      if (g >= 18 && g <= 45) gaps.push(g);
+    }
+    const recent = gaps.slice(-6);
+    return { len: recent.length ? Math.round(recent.reduce((a, b) => a + b, 0) / recent.length) : 28, known: recent.length > 0 };
+  }
 
+  // Cycle day and phase for a date. Future days past the expected period are estimates;
+  // today and past days stay in Nurture until a new start date is added.
+  function cycleInfo(key) {
+    const starts = data.cycle.starts.filter(s => s <= key).sort();
+    if (!starts.length) return null;
+    const { len } = avgCycle();
+    let day = daysBetween(starts[starts.length - 1], key) + 1;
+    let estimated = false;
+    if (day > len && key > dayKey(new Date())) { day = ((day - 1) % len) + 1; estimated = true; }
+    const e = data.cycle.ends;
+    const phase = day <= e.p1 ? 'p1' : day <= e.fire ? 'fire' : day <= e.p2 ? 'p2' : 'nurture';
+    return { day, phase, estimated, len, last: starts[starts.length - 1] };
+  }
+
+  function weekPhase(ws) {
+    const counts = {};
+    for (let i = 0; i < 7; i++) {
+      const c = cycleInfo(dayKey(addDays(ws, i)));
+      const p = c ? c.phase : 'none';
+      counts[p] = (counts[p] || 0) + 1;
+    }
+    return Object.entries(counts).sort((a, b) => b[1] - a[1])[0][0];
+  }
+
+  function weekProgress(ws) {
+    const keys = [...Array(7)].map((_, i) => dayKey(addDays(ws, i)));
+    const items = data.log.filter(s => keys.includes(s.day));
+    const phase = weekPhase(ws);
+    const goals = data.goals[phase] || DEFAULT_GOALS[phase];
+    const res = {};
+    Object.keys(CATS).forEach(c => {
+      const days = new Set(items.filter(s => catOf(s) === c).map(s => s.day)).size;
+      const goal = goals[c] || 0;
+      res[c] = { days, goal, done: days >= goal };
+    });
+    const high = Object.values(res).some(r => r.goal > 0) && Object.values(res).every(r => r.done);
+    const full = Object.values(res).every(r => r.days > 0);
+    return { ws, keys, items, phase, res, high, full };
+  }
+
+  // Weeks in a row with every goal met. This week counts once it's met, and never breaks the streak while it's in progress.
+  function weekStreak() {
+    let ws = weekStart(new Date()), n = 0;
+    if (weekProgress(ws).high) n++;
+    for (let i = 0; i < 520; i++) {
+      ws = addDays(ws, -7);
+      if (!weekProgress(ws).high) break;
+      n++;
+    }
+    return n;
+  }
+
+  function moments() {
+    const hours = sum(data.log) / 60, sessions = data.log.length;
+    let highs = 0, fulls = 0;
+    if (sessions) {
+      const first = data.log.map(s => s.day).sort()[0];
+      for (let ws = weekStart(parseDay(first)); ws <= new Date(); ws = addDays(ws, 7)) {
+        const w = weekProgress(ws);
+        if (w.high) highs++;
+        if (w.full) fulls++;
+      }
+    }
+    const ladders = [
+      [sessions, [1, 10, 50, 100, 250, 500, 1000], n => (n === 1 ? 'First practice' : `${n} practices`)],
+      [hours, [1, 5, 10, 25, 50, 100, 250], n => `${n} hours`],
+      [highs, [1, 4, 10, 26, 52], n => (n === 1 ? 'First high-tide week' : `${n} high-tide weeks`)],
+      [fulls, [1, 10, 26], n => (n === 1 ? 'First full-circle week' : `${n} full-circle weeks`)]
+    ];
+    const earned = [], next = [];
+    ladders.forEach(([have, steps, label]) => {
+      steps.forEach(s => { if (have >= s) earned.push(label(s)); });
+      const need = steps.find(s => have < s);
+      if (need) next.push({ text: label(need), have, need });
+    });
+    next.sort((a, b) => b.have / b.need - a.have / a.need);
+    return { earned, next: next[0] };
+  }
+
+  // ---------- rendering ----------
+  function renderTide(w) {
+    const today = dayKey(new Date());
+    const ci = cycleInfo(today);
+    const pl = $('phaseLine');
+    pl.innerHTML = '';
+    if (ci) {
+      const pill = document.createElement('span');
+      pill.className = 'phase-pill';
+      pill.style.setProperty('--ph', `var(--${ci.phase})`);
+      pill.innerHTML = '<i></i>';
+      pill.append(PHASE_NAMES[ci.phase]);
+      const left = daysBetween(today, dayKey(addDays(parseDay(ci.last), ci.len)));
+      const t = document.createElement('span');
+      t.textContent = `Day ${ci.day} · ` + (left > 0 ? `period expected in about ${plural(left, 'day')}` : 'period expected around now');
+      pl.append(pill, t);
+    } else {
+      const t = document.createElement('span');
+      t.textContent = 'Add your last period start to match goals to your phases.';
+      const b = document.createElement('button');
+      b.type = 'button'; b.className = 'link'; b.textContent = 'Set up';
+      b.addEventListener('click', openSettings);
+      pl.append(t, b);
+    }
+
+    $('weekRange').textContent = `This week · ${shortDate(w.ws)} – ${shortDate(addDays(w.ws, 6))}`;
+    $('weekTitle').textContent = w.phase === 'none' ? 'Your week' : `${PHASE_NAMES[w.phase]} week`;
+    $('streakNum').textContent = weekStreak();
+
+    const pools = $('pools');
+    pools.innerHTML = '';
+    Object.entries(CATS).forEach(([c, name]) => {
+      const r = w.res[c];
+      const level = r.goal ? Math.min(1, r.days / r.goal) : (r.days ? 1 : 0);
+      const pool = document.createElement('div');
+      pool.className = 'pool';
+      const vessel = document.createElement('div');
+      vessel.className = 'vessel' + (r.goal && r.done ? ' met' : '');
+      const water = document.createElement('div');
+      water.className = `water ${c}`;
+      water.style.height = `${level * 100}%`;
+      if (!level) water.dataset.empty = '';
+      vessel.appendChild(water);
+      if (r.goal && r.done) { const ck = document.createElement('span'); ck.className = 'check'; ck.textContent = '✓'; vessel.appendChild(ck); }
+      const b = document.createElement('b'); b.textContent = name;
+      const sm = document.createElement('small'); sm.textContent = r.goal ? `${r.days} of ${r.goal} days` : `${plural(r.days, 'day')} · no goal`;
+      pool.append(vessel, b, sm);
+      pools.appendChild(pool);
+    });
+
+    const weekName = w.phase === 'none' ? 'week' : `${PHASE_NAMES[w.phase]} week`;
+    let msg;
+    if (w.high) {
+      msg = `High tide. Every goal for this ${weekName} is met.`;
+    } else {
+      const missing = Object.entries(w.res).filter(([, r]) => !r.done).map(([c, r]) => `${r.goal - r.days} more ${CATS[c]} ${r.goal - r.days === 1 ? 'day' : 'days'}`);
+      msg = `${missing.length > 1 ? missing.slice(0, -1).join(', ') + ' and ' + missing[missing.length - 1] : missing[0]} for high tide.`;
+      if (w.full) msg += ' Full circle already: all three got some time.';
+    }
+    $('tideMsg').textContent = msg;
+    $('tide').classList.toggle('high', w.high);
+  }
+
+  function renderWeek(w) {
+    const today = dayKey(new Date());
     $('totals').innerHTML = '';
-    Object.entries(TYPES).forEach(([t, name]) => {
+    Object.entries(CATS).forEach(([c, name]) => {
       const el = document.createElement('div');
       el.className = 'total';
-      el.innerHTML = `<b>${Math.round(sum(recent, t))}</b><span><i class="dot ${t}"></i>${name} min</span>`;
+      el.innerHTML = `<b>${Math.round(sum(w.items, c))}</b><span><i class="dot ${c}"></i>${name}</span>`;
       $('totals').appendChild(el);
     });
-    $('weekTotal').textContent = `${fmtMin(sum(recent))} · ${new Set(recent.map(s => s.day)).size} of 7 days`;
+    $('weekTotal').textContent = `${fmtMin(sum(w.items))} · ${new Set(w.items.map(s => s.day)).size} of 7 days`;
 
-    const perDay = keys.map(k => log.filter(s => s.day === k));
+    const perDay = w.keys.map(k => w.items.filter(s => s.day === k));
     const max = Math.max(30, ...perDay.map(items => sum(items)));
+    const seen = new Set();
     $('week').innerHTML = '';
     perDay.forEach((items, i) => {
-      const total = sum(items);
+      const k = w.keys[i], total = sum(items), ci = cycleInfo(k);
       const col = document.createElement('div');
-      col.className = 'day' + (i === 6 ? ' today' : '');
-      col.title = `${dayLabel(keys[i])}: ${fmtMin(total)}`;
+      col.className = 'day' + (k === today ? ' today' : '') + (k > today ? ' future' : '');
+      col.title = `${dayLabel(k)}: ${fmtMin(total)}${ci ? ` · ${PHASE_NAMES[ci.phase]}${ci.estimated ? ' (estimate)' : ''}` : ''}`;
       const stack = document.createElement('div');
       stack.className = 'stack';
       stack.style.height = total ? `${Math.max(6, (total / max) * 100)}%` : '3px';
-      Object.keys(TYPES).forEach(t => {
-        const m = sum(items, t);
+      Object.keys(CATS).forEach(c => {
+        const m = sum(items, c);
         if (!m) return;
         const seg = document.createElement('i');
-        seg.className = t;
+        seg.className = c;
         seg.style.flex = `${m} 1 0px`;
         stack.appendChild(seg);
       });
+      const ph = document.createElement('div');
+      ph.className = 'ph' + (ci && ci.estimated ? ' est' : '');
+      if (ci) { ph.style.setProperty('--ph', `var(--${ci.phase})`); seen.add(ci.phase); }
       const label = document.createElement('small');
-      label.textContent = days[i].toLocaleDateString(undefined, { weekday: 'narrow' });
-      col.append(stack, label);
+      label.textContent = addDays(w.ws, i).toLocaleDateString(undefined, { weekday: 'narrow' });
+      col.append(stack, ph, label);
       $('week').appendChild(col);
     });
+    $('legend').innerHTML = '';
+    PHASES_ORDER.filter(p => seen.has(p)).forEach(p => {
+      const s = document.createElement('span');
+      s.innerHTML = `<i style="--ph: var(--${p})"></i>`;
+      s.append(PHASE_NAMES[p]);
+      $('legend').appendChild(s);
+    });
+  }
 
-    const sorted = log.slice().sort((a, b) => b.day.localeCompare(a.day) || b.ts - a.ts);
+  function renderHistory() {
+    const sorted = data.log.slice().sort((a, b) => b.day.localeCompare(a.day) || b.ts - a.ts);
     const ul = $('history');
     ul.innerHTML = '';
     if (!sorted.length) {
       const li = document.createElement('li');
       li.className = 'empty';
       li.style.display = 'block';
-      li.textContent = 'Nothing logged yet. Add a yoga or meditation practice above, or finish a breathing session.';
+      li.textContent = 'Nothing logged yet. Add a practice above, or finish a breathing session.';
       ul.appendChild(li);
     }
     sorted.slice(0, shown).forEach(s => {
+      const act = activity(s.type), ci = cycleInfo(s.day);
       const li = document.createElement('li');
       const dot = document.createElement('i');
-      dot.className = `dot ${s.type}`;
+      dot.className = `dot ${act.cat}`;
       const what = document.createElement('div');
       what.className = 'what';
       const name = document.createElement('b');
-      name.textContent = TYPES[s.type] || s.type;
+      name.textContent = act.name;
       const detail = document.createElement('small');
       const extra = s.note || (s.type === 'breath' && PATTERNS[s.p] ? PATTERNS[s.p].name : '');
-      detail.textContent = extra ? `${dayLabel(s.day)} · ${extra}` : dayLabel(s.day);
+      detail.textContent = [dayLabel(s.day), ci && PHASE_NAMES[ci.phase], extra].filter(Boolean).join(' · ');
       what.append(name, detail);
       const mins = document.createElement('span');
       mins.className = 'mins';
@@ -685,7 +1005,7 @@ button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
       del.type = 'button';
       del.className = 'del';
       del.textContent = 'Remove';
-      del.setAttribute('aria-label', `Remove ${name.textContent}, ${detail.textContent}`);
+      del.setAttribute('aria-label', `Remove ${act.name}, ${detail.textContent}`);
       del.addEventListener('click', () => removeEntry(s.ts));
       li.append(dot, what, mins, del);
       ul.appendChild(li);
@@ -693,33 +1013,195 @@ button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
     $('showMore').hidden = sorted.length <= shown;
   }
 
+  function renderMoments() {
+    const { earned, next } = moments();
+    const ul = $('moments');
+    ul.innerHTML = '';
+    if (!earned.length) {
+      const li = document.createElement('li');
+      li.className = 'empty note';
+      li.textContent = 'Milestones collect here as you practise. They never reset.';
+      ul.appendChild(li);
+    }
+    earned.forEach(t => { const li = document.createElement('li'); li.textContent = t; ul.appendChild(li); });
+    $('nextUp').textContent = next
+      ? `Next: ${next.text} (${Number.isInteger(next.have) ? next.have : next.have.toFixed(1)} so far).`
+      : '';
+  }
+
+  function renderLog() {
+    const w = weekProgress(weekStart(new Date()));
+    renderTide(w);
+    renderWeek(w);
+    renderHistory();
+    renderMoments();
+  }
+
+  function chip(id, label, pressed, onClick, extraClass) {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'chip' + (extraClass ? ` ${extraClass}` : '');
+    b.id = id;
+    b.textContent = label;
+    if (pressed !== null) b.setAttribute('aria-pressed', pressed);
+    b.addEventListener('click', onClick);
+    return b;
+  }
+
   function renderForm() {
     const typeRow = $('logType');
     typeRow.innerHTML = '';
-    Object.entries(TYPES).forEach(([t, name]) => {
-      const b = document.createElement('button');
-      b.type = 'button';
-      b.className = 'chip';
-      b.id = `logType-${t}`;
-      b.textContent = name;
-      b.setAttribute('aria-pressed', t === logType);
-      b.addEventListener('click', () => { logType = t; renderForm(); });
-      typeRow.appendChild(b);
+    data.activities.filter(a => !a.hidden).forEach(a => {
+      typeRow.appendChild(chip(`logType-${a.id}`, a.name, a.id === logActivity, () => { logActivity = a.id; renderForm(); }));
     });
+    typeRow.appendChild(chip('logType-new', '+ New', null, () => { $('newAct').hidden = false; $('newActName').focus(); }, 'new'));
+
+    const catRow = $('newActCat');
+    catRow.innerHTML = '';
+    Object.entries(CATS).forEach(([c, name]) => {
+      catRow.appendChild(chip(`newActCat-${c}`, name, c === newActCat, () => { newActCat = c; renderForm(); }));
+    });
+
     const quick = $('logQuick');
     quick.innerHTML = '';
     QUICK.forEach(m => {
-      const b = document.createElement('button');
-      b.type = 'button';
-      b.className = 'chip';
-      b.id = `logQuick-${m}`;
-      b.textContent = `${m} min`;
-      b.setAttribute('aria-pressed', Number($('logMinutes').value) === m);
-      b.addEventListener('click', () => { $('logMinutes').value = m; renderForm(); });
-      quick.appendChild(b);
+      quick.appendChild(chip(`logQuick-${m}`, `${m} min`, Number($('logMinutes').value) === m, () => { $('logMinutes').value = m; renderForm(); }));
     });
   }
 
+  function addActivity() {
+    const name = $('newActName').value.trim();
+    if (!name) { $('newActName').focus(); return; }
+    const existing = data.activities.find(a => a.name.toLowerCase() === name.toLowerCase());
+    if (existing) {
+      existing.hidden = false;
+      logActivity = existing.id;
+    } else {
+      const id = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 20) + '-' + Date.now().toString(36);
+      data.activities.push({ id, name, cat: newActCat });
+      logActivity = id;
+    }
+    $('newActName').value = '';
+    $('newAct').hidden = true;
+    save(); renderForm();
+    if ($('settings').open) renderSettings();
+  }
+
+  // ---------- settings ----------
+  function renderSettings() {
+    const today = dayKey(new Date());
+    $('startDate').max = today;
+    if (!$('startDate').value) $('startDate').value = today;
+
+    const ul = $('starts');
+    ul.innerHTML = '';
+    data.cycle.starts.slice().sort().reverse().slice(0, 12).forEach(k => {
+      const li = document.createElement('li');
+      const t = document.createElement('span');
+      t.textContent = parseDay(k).toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric' });
+      const del = document.createElement('button');
+      del.type = 'button'; del.className = 'del'; del.textContent = 'Remove';
+      del.addEventListener('click', () => {
+        data.cycle.starts = data.cycle.starts.filter(s => s !== k);
+        save(); renderSettings(); renderLog(); renderStats();
+      });
+      li.append(t, del);
+      ul.appendChild(li);
+    });
+    const { len, known } = avgCycle();
+    $('cycleLen').textContent = data.cycle.starts.length
+      ? (known ? `Average cycle: ${len} days.` : 'Using a 28-day cycle until you add a second start date.')
+      : '';
+
+    $('endP1').value = data.cycle.ends.p1;
+    $('endFire').value = data.cycle.ends.fire;
+    $('endP2').value = data.cycle.ends.p2;
+
+    const table = $('goals');
+    table.innerHTML = '<thead><tr><th scope="col">Week</th>' + Object.values(CATS).map(n => `<th scope="col">${n}</th>`).join('') + '</tr></thead>';
+    const tbody = document.createElement('tbody');
+    [...PHASES_ORDER, 'none'].forEach(p => {
+      const tr = document.createElement('tr');
+      const th = document.createElement('td');
+      th.innerHTML = `<i style="--ph: var(--${p === 'none' ? 'line' : p})"></i>`;
+      th.append(PHASE_NAMES[p]);
+      tr.appendChild(th);
+      Object.keys(CATS).forEach(c => {
+        const td = document.createElement('td');
+        const input = document.createElement('input');
+        input.type = 'number'; input.min = 0; input.max = 7; input.inputMode = 'numeric';
+        input.id = `goal-${p}-${c}`;
+        input.value = data.goals[p][c];
+        input.setAttribute('aria-label', `${PHASE_NAMES[p]}, ${CATS[c]} days per week`);
+        input.addEventListener('change', () => {
+          const v = Math.max(0, Math.min(7, Math.round(Number(input.value) || 0)));
+          input.value = v;
+          data.goals[p][c] = v;
+          save(); renderLog(); renderStats();
+        });
+        td.appendChild(input);
+        tr.appendChild(td);
+      });
+      tbody.appendChild(tr);
+    });
+    table.appendChild(tbody);
+
+    const acts = $('acts');
+    acts.innerHTML = '';
+    data.activities.forEach((a, i) => {
+      const li = document.createElement('li');
+      li.className = a.hidden ? 'hidden-act' : '';
+      const name = document.createElement('input');
+      name.type = 'text'; name.maxLength = 30; name.id = `act-name-${i}`; name.value = a.name;
+      name.setAttribute('aria-label', 'Activity name');
+      name.addEventListener('change', () => {
+        const v = name.value.trim();
+        if (v) { a.name = v; save(); renderForm(); renderLog(); } else name.value = a.name;
+      });
+      const sel = document.createElement('select');
+      sel.id = `act-cat-${i}`;
+      sel.setAttribute('aria-label', `Group for ${a.name}`);
+      Object.entries(CATS).forEach(([c, n]) => { const o = document.createElement('option'); o.value = c; o.textContent = n; o.selected = a.cat === c; sel.appendChild(o); });
+      sel.addEventListener('change', () => { a.cat = sel.value; save(); renderLog(); renderStats(); });
+      const hide = document.createElement('button');
+      hide.type = 'button'; hide.className = 'del';
+      hide.textContent = a.hidden ? 'Show' : 'Hide';
+      hide.setAttribute('aria-label', `${a.hidden ? 'Show' : 'Hide'} ${a.name} in the add form`);
+      hide.addEventListener('click', () => {
+        a.hidden = !a.hidden;
+        if (a.hidden && logActivity === a.id) logActivity = (data.activities.find(x => !x.hidden) || a).id;
+        save(); renderSettings(); renderForm();
+      });
+      li.append(name, sel, hide);
+      acts.appendChild(li);
+    });
+  }
+
+  function addStart(k) {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(k) || k > dayKey(new Date())) return;
+    if (!data.cycle.starts.includes(k)) data.cycle.starts.push(k);
+    save(); renderSettings(); renderLog(); renderStats();
+    showToast(`Saved period start, ${parseDay(k).toLocaleDateString(undefined, { day: 'numeric', month: 'short' })}`, false);
+  }
+
+  function savePhaseEnds() {
+    const p1 = Math.round(Number($('endP1').value)), fire = Math.round(Number($('endFire').value)), p2 = Math.round(Number($('endP2').value));
+    if (p1 >= 1 && fire > p1 && p2 > fire && p2 <= 40) {
+      data.cycle.ends = { p1, fire, p2 };
+      save(); renderLog(); renderStats();
+    } else {
+      showToast('Each phase has to end after the one before it.', false);
+    }
+    renderSettings();
+  }
+
+  function openSettings() {
+    $('settings').open = true;
+    renderSettings();
+    $('settings').scrollIntoView({ behavior: reducedMotion.matches ? 'auto' : 'smooth', block: 'start' });
+  }
+
+  // ---------- toast & entries ----------
   function showToast(text, canUndo) {
     $('toastText').textContent = text;
     $('toastUndo').hidden = !canUndo;
@@ -734,7 +1216,7 @@ button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
     if (i < 0) return;
     const entry = data.log.splice(i, 1)[0];
     save(); renderLog(); renderStats();
-    showToast(`Removed ${(TYPES[entry.type] || '').toLowerCase()}, ${fmtMin(entry.min)}`, true);
+    showToast(`Removed ${activity(entry.type).name.toLowerCase()}, ${fmtMin(entry.min)}`, true);
     lastRemoved = { entry, index: i };
   }
   $('toastUndo').addEventListener('click', () => {
@@ -753,15 +1235,22 @@ button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
     const min = Math.round(Number($('logMinutes').value));
     const day = $('logDate').value;
     if (!(min >= 1) || !/^\d{4}-\d{2}-\d{2}$/.test(day)) return;
-    const entry = { type: logType, day, min: Math.min(600, min), ts: Date.now() };
+    const entry = { type: logActivity, day, min: Math.min(600, min), ts: Date.now() };
     const note = $('logNote').value.trim();
     if (note) entry.note = note;
     data.log.push(entry);
     save(); renderLog(); renderStats();
     $('logNote').value = '';
-    showToast(`Saved ${TYPES[logType].toLowerCase()}, ${fmtMin(entry.min)}`, false);
+    showToast(`Saved ${activity(logActivity).name.toLowerCase()}, ${fmtMin(entry.min)}`, false);
   });
-  $('showMore').addEventListener('click', () => { shown += 20; renderLog(); });
+  $('newActAdd').addEventListener('click', addActivity);
+  $('newActCancel').addEventListener('click', () => { $('newActName').value = ''; $('newAct').hidden = true; });
+  $('newActName').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); addActivity(); } });
+  $('showMore').addEventListener('click', () => { shown += 20; renderHistory(); });
+  $('startAdd').addEventListener('click', () => addStart($('startDate').value));
+  $('startToday').addEventListener('click', () => addStart(dayKey(new Date())));
+  ['endP1', 'endFire', 'endP2'].forEach(id => $(id).addEventListener('change', savePhaseEnds));
+  $('settings').addEventListener('toggle', () => { if ($('settings').open) renderSettings(); });
 
   function showView(v) {
     const isLog = v === 'log';
