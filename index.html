@@ -849,7 +849,7 @@ button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
     }
     const ladders = [
       [sessions, [1, 10, 50, 100, 250, 500, 1000], n => (n === 1 ? 'First practice' : `${n} practices`)],
-      [hours, [1, 5, 10, 25, 50, 100, 250], n => `${n} hours`],
+      [hours, [1, 5, 10, 25, 50, 100, 250], n => plural(n, 'hour')],
       [highs, [1, 4, 10, 26, 52], n => (n === 1 ? 'First high-tide week' : `${n} high-tide weeks`)],
       [fulls, [1, 10, 26], n => (n === 1 ? 'First full-circle week' : `${n} full-circle weeks`)]
     ];
@@ -908,7 +908,7 @@ button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
       vessel.appendChild(water);
       if (r.goal && r.done) { const ck = document.createElement('span'); ck.className = 'check'; ck.textContent = '✓'; vessel.appendChild(ck); }
       const b = document.createElement('b'); b.textContent = name;
-      const sm = document.createElement('small'); sm.textContent = r.goal ? `${r.days} of ${r.goal} days` : `${plural(r.days, 'day')} · no goal`;
+      const sm = document.createElement('small'); sm.textContent = r.goal ? `${r.days} of ${plural(r.goal, 'day')}` : `${plural(r.days, 'day')} · no goal`;
       pool.append(vessel, b, sm);
       pools.appendChild(pool);
     });
